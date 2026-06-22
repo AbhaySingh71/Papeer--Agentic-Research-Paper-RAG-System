@@ -1,0 +1,14 @@
+{
+  "d8e0197c-7ebc-4344-b378-eab33b6b1ba5": {
+    "id": "d8e0197c-7ebc-4344-b378-eab33b6b1ba5",
+    "name": "Chatting about AI research",
+    "created_at": "2026-06-19T19:41:56.721825",
+    "is_named": true
+  },
+  "62cccec1-f4fe-45ab-8625-5e333ce67ccc": {
+    "id": "62cccec1-f4fe-45ab-8625-5e333ce67ccc",
+    "name": "New Session",
+    "created_at": "2026-06-19T19:51:08.600210",
+    "is_named": false
+  }
+}
