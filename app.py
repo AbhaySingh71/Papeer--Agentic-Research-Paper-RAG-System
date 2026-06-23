@@ -200,7 +200,10 @@ def delete_session(session_id: str) -> None:
 
 
 def load_session_chats(session_id: str) -> list[dict]:
-    config = {"configurable": {"thread_id": session_id}}
+    config = {
+        "configurable": {"thread_id": session_id},
+        "metadata": {"session_id": session_id}
+    }
     try:
         state = graph.get_state(config)
         if not state or not state.values:
@@ -487,7 +490,10 @@ if prompt := st.chat_input("Ask about your papers, verify a claim, or search the
             "is_relevant": None,
             "rewrite_count": 0,
         }
-        config = {"configurable": {"thread_id": active_sid}}
+        config = {
+            "configurable": {"thread_id": active_sid},
+            "metadata": {"session_id": active_sid}
+        }
 
         with st.chat_message("assistant"):
             placeholder = st.empty()

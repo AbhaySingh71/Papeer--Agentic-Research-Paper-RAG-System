@@ -60,7 +60,10 @@ def load_goldens() -> list[dict]:
 
 
 def run_rag_query(graph, query: str, session_id: str) -> tuple[str, list[str]]:
-    config = {"configurable": {"thread_id": str(session_id)}}
+    config = {
+        "configurable": {"thread_id": str(session_id)},
+        "metadata": {"session_id": str(session_id)}
+    }
     final_state = graph.invoke(
         {
             "messages": [HumanMessage(content=query)],
