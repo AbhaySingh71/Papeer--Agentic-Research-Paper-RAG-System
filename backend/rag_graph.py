@@ -20,6 +20,7 @@ from tavily import TavilyClient
 
 from backend.models import ClaimVerificationResult, RelevancyDecision, RouterDecision
 from backend.vector_store import search as vs_search
+from backend.guardrails import run_input_guardrail, run_output_guardrail
 
 load_dotenv()
 
@@ -356,6 +357,33 @@ def generate_answer_node(state: RAGState) -> dict:
     return {"answer": answer, "messages": [AIMessage(content=answer)]}
 
 
+def input_guard_node(state: RAGState) -> dict:
+    query = state["messages"][-1].content
+    is_safe, res_or_error = run_input_guardrail(query)
+    if not is_safe:
+        return {
+            "answer": f"Guardrail Alert: {res_or_error}",
+            "route": "direct_answer",
+            "messages": [AIMessage(content=f"Guardrail Alert: {res_or_error}")]
+        }
+    return {}
+
+
+def output_guard_node(state: RAGState) -> dict:
+    # If the input was flagged, we don't check output again
+    if "Guardrail Alert" in (state.get("answer") or ""):
+        return {}
+    answer = state.get("answer") or ""
+    docs = state.get("retrieved_docs") or []
+    is_safe, validated_answer = run_output_guardrail(answer, docs)
+    if not is_safe:
+        return {
+            "answer": validated_answer,
+            "messages": [AIMessage(content=validated_answer)]
+        }
+    return {}
+
+
 # ── Graph ─────────────────────────────────────────────────────────────────────
 
 MAX_RETRIEVAL_ATTEMPTS = 3
@@ -390,6 +418,7 @@ def build_graph(db_path: str = "checkpoints.db"):
     checkpointer = SqliteSaver(conn)
 
     graph = StateGraph(RAGState)
+    graph.add_node("input_guard", input_guard_node)
     graph.add_node("router", router_node)
     graph.add_node("agent_node", agent_node)
     graph.add_node("retrieval", base_tool_node)
@@ -397,8 +426,15 @@ def build_graph(db_path: str = "checkpoints.db"):
     graph.add_node("query_rewrite", query_rewrite_node)
     graph.add_node("verify_claim", verify_claim_node)
     graph.add_node("generate_answer", generate_answer_node)
+    graph.add_node("output_guard", output_guard_node)
 
-    graph.set_entry_point("router")
+    graph.set_entry_point("input_guard")
+
+    graph.add_conditional_edges(
+        "input_guard",
+        lambda state: "end" if state.get("answer") else "router",
+        {"end": END, "router": "router"}
+    )
 
     graph.add_conditional_edges(
         "router",
@@ -429,7 +465,8 @@ def build_graph(db_path: str = "checkpoints.db"):
     graph.add_edge("query_rewrite", "agent_node")
 
     graph.add_edge("verify_claim", "generate_answer")
-    graph.add_edge("generate_answer", END)
+    graph.add_edge("generate_answer", "output_guard")
+    graph.add_edge("output_guard", END)
 
     return graph.compile(checkpointer=checkpointer)
 
