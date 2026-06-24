@@ -9,11 +9,15 @@ from guardrails.validator_base import (
     Validator,
     register_validator,
 )
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
-# Initialize Gemini LLM for guardrail evaluations
-# We use gemini-2.5-flash-lite as a lightweight, fast, and free-tier validator
-eval_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
+# Initialize LLM for guardrail evaluations
+eval_llm = ChatOpenAI(
+    model="llama-3.1-8b-instant",
+    openai_api_key=os.environ["GROQ_API_KEY"],
+    openai_api_base="https://api.groq.com/openai/v1",
+    temperature=0.1,
+)
 
 
 @register_validator(name="papeer/input_safety", data_type="string")

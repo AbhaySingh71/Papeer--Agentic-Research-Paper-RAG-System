@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import uuid
 from datetime import datetime
@@ -6,7 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 from backend.btw_handler import handle_btw
 from backend.paper_loader import load_arxiv, load_document, load_webpage
@@ -87,7 +88,12 @@ def get_graph():
 
 
 SESSIONS_FILE = Path("sessions.json")
-_rename_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
+_rename_llm = ChatOpenAI(
+    model="llama-3.1-8b-instant",
+    openai_api_key=os.environ["GROQ_API_KEY"],
+    openai_api_base="https://api.groq.com/openai/v1",
+    temperature=0.1,
+)
 
 
 def load_sessions() -> dict:
@@ -489,6 +495,7 @@ if prompt := st.chat_input("Ask about your papers, verify a claim, or search the
             "answer": None,
             "is_relevant": None,
             "rewrite_count": 0,
+            "cohere_log": None,
         }
         config = {
             "configurable": {"thread_id": active_sid},
@@ -515,6 +522,10 @@ if prompt := st.chat_input("Ask about your papers, verify a claim, or search the
             placeholder.markdown(response_text)
 
             final_values = graph.get_state(config).values
+            
+            if final_values.get("cohere_log"):
+                st.caption(f"🔍 **Cohere Rerank Log:** {final_values.get('cohere_log')}")
+
             state_snapshot = _serialize_state(final_values)
 
             with st.expander(f"📊 Graph state · turn {current_turn}", expanded=False):

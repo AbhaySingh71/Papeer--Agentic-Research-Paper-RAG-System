@@ -7,10 +7,16 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from tavily import TavilyClient
 
 from backend.models import BtwRouteDecision
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
+llm = ChatOpenAI(
+    model="llama-3.1-8b-instant",
+    openai_api_key=os.environ["GROQ_API_KEY"],
+    openai_api_base="https://api.groq.com/openai/v1",
+    temperature=0.1,
+)
 
 
 def handle_btw(query: str) -> Generator[str, None, None]:
@@ -21,7 +27,7 @@ def handle_btw(query: str) -> Generator[str, None, None]:
          "current prices, breaking news) or if your general knowledge is sufficient."),
         ("human", "{query}"),
     ])
-    decision = (route_prompt | llm.with_structured_output(BtwRouteDecision)).invoke({"query": query})
+    decision = (route_prompt | llm.with_structured_output(BtwRouteDecision, method="function_calling")).invoke({"query": query})
 
     if decision.needs_web_search:
         client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])

@@ -10,7 +10,7 @@ from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import InjectedToolCallId, tool
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import InjectedState, ToolNode, tools_condition
@@ -24,7 +24,12 @@ from backend.guardrails import run_input_guardrail, run_output_guardrail
 
 load_dotenv()
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
+llm = ChatOpenAI(
+    model="llama-3.1-8b-instant",
+    openai_api_key=os.environ["GROQ_API_KEY"],
+    openai_api_base="https://api.groq.com/openai/v1",
+    temperature=0.1,
+)
 
 
 # ── State ─────────────────────────────────────────────────────────────────────
@@ -41,6 +46,7 @@ class RAGState(MessagesState):
     answer: str | None
     is_relevant: bool | None
     rewrite_count: int
+    cohere_log: str | None
 
 
 # ── Router ────────────────────────────────────────────────────────────────────
@@ -69,7 +75,7 @@ ROUTER_PROMPT = ChatPromptTemplate.from_messages([
     ("human", "{query}"),
 ])
 
-router_chain = ROUTER_PROMPT | llm.with_structured_output(RouterDecision)
+router_chain = ROUTER_PROMPT | llm.with_structured_output(RouterDecision, method="function_calling")
 
 
 def router_node(state: RAGState) -> dict:
@@ -101,13 +107,19 @@ def retrieve_from_vectorstore(
     tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> list:
     """Search the uploaded research paper vector store for relevant passages."""
-    docs = vs_search(query=query, session_id=session_id, k=k)
+    docs, rerank_log = vs_search(query=query, session_id=session_id, k=k)
     if not docs:
-        return [ToolMessage(content="No relevant documents found in the vector store.", tool_call_id=tool_call_id)]
+        return [
+            ToolMessage(content="No relevant documents found in the vector store.", tool_call_id=tool_call_id),
+            Command(update={"cohere_log": rerank_log})
+        ]
     summary = f"Retrieved {len(docs)} chunk(s) from the vector store."
     return [
         ToolMessage(content=summary, tool_call_id=tool_call_id),
-        Command(update={"retrieved_docs": (current_docs or []) + docs}),
+        Command(update={
+            "retrieved_docs": (current_docs or []) + docs,
+            "cohere_log": rerank_log
+        }),
     ]
 
 
@@ -173,7 +185,7 @@ RELEVANCY_CHECK_SYSTEM = (
     "no useful information.\n\nBe lenient: if there is any substantive overlap, return true."
 )
 
-relevancy_llm = llm.with_structured_output(RelevancyDecision)
+relevancy_llm = llm.with_structured_output(RelevancyDecision, method="function_calling")
 
 QUERY_REWRITE_SYSTEM = (
     "You are a query rewriting assistant for a research paper retrieval system. "
@@ -249,7 +261,7 @@ CLAIM_ANALYSIS_PROMPT = (
     "- verdict_summary should be 1-2 sentences suitable for display to the user."
 )
 
-verification_llm = llm.with_structured_output(ClaimVerificationResult)
+verification_llm = llm.with_structured_output(ClaimVerificationResult, method="function_calling")
 
 
 def verify_claim_node(state: RAGState) -> dict:

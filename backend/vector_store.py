@@ -1,4 +1,5 @@
 import os
+import logging
 
 from dotenv import load_dotenv
 from langchain_classic.embeddings import CacheBackedEmbeddings
@@ -8,8 +9,11 @@ from langchain_community.retrievers.bm25 import BM25Retriever
 from langchain_core.documents import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
+from langchain_cohere import CohereRerank
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -156,9 +160,46 @@ def get_hybrid_retriever(session_id: str, k: int = 4):
     return ensemble_retriever
 
 
-def search(query: str, session_id: str, k: int = 4) -> list[Document]:
-    retriever = get_hybrid_retriever(session_id, k=k)
+def search(query: str, session_id: str, k: int = 4) -> tuple[list[Document], str]:
+    # Retrieve a larger candidate pool for reranking (e.g. 3 * k, at least 12 docs)
+    candidate_k = max(k * 3, 12)
+    retriever = get_hybrid_retriever(session_id, k=candidate_k)
     if not retriever:
-        return []
-    return retriever.invoke(query)
+        return [], "No active retriever found."
+    
+    candidates = retriever.invoke(query)
+    if not candidates:
+        return [], "No search results found in knowledge base."
+
+    cohere_api_key = os.getenv("COHERE_API_KEY")
+    if not cohere_api_key:
+        msg = "COHERE_API_KEY not configured. Returning top raw hybrid retrieval results."
+        logger.warning(msg)
+        return candidates[:k], msg
+
+    try:
+        reranker = CohereRerank(
+            model="rerank-english-v3.0",
+            cohere_api_key=cohere_api_key,
+            top_n=k
+        )
+        reranked_docs = reranker.compress_documents(candidates, query)
+        
+        details = []
+        for idx, doc in enumerate(reranked_docs, 1):
+            score = doc.metadata.get("relevance_score")
+            title = doc.metadata.get("title", "Unknown")
+            page = doc.metadata.get("page", 0) + 1  # 0-indexed page to 1-indexed for user readability
+            score_str = f"{score:.4f}" if score is not None else "N/A"
+            details.append(f"Rank {idx}: [Score {score_str}] {title} (Page {page})")
+            
+        msg = f"Successfully reranked {len(candidates)} down to {len(reranked_docs)} using Cohere (Model: rerank-english-v3.0). Details: {'; '.join(details)}"
+        logger.info(msg)
+        print(f"\n[COHERE RERANK SUCCESS] {msg}\n")
+        return reranked_docs, msg
+    except Exception as e:
+        msg = f"Cohere Rerank failed: {e}. Falling back to top raw hybrid retrieval (Ranker Cohere `rerank-english-v3.0` bypassed)."
+        logger.error(msg)
+        print(f"\n[COHERE RERANK ERROR] {msg}\n")
+        return candidates[:k], msg
 
