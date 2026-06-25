@@ -1,0 +1,243 @@
+/* Import premium fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap');
+
+/* Global Font & Color Overrides */
+html, body, [data-testid="stSidebar"] {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Widen centered content layout container */
+.block-container {
+    max-width: 1050px !important;
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600;
+    color: #f3f4f6;
+}
+
+/* Page Title Gradient styling */
+.main-title {
+    background: linear-gradient(135deg, #a78bfa 0%, #6366f1 50%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800 !important;
+    font-size: 2.8rem !important;
+    margin-bottom: 0.2rem !important;
+}
+
+/* Sub-header description styling */
+.sub-title {
+    color: #9ca3af;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Sidebar Styling */
+[data-testid="stSidebar"] {
+    background-color: #0d111a !important;
+    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Modern logo positioning and design */
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 15px;
+    margin-bottom: 25px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(99, 102, 241, 0.04) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.12);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.logo-image {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+    transform: rotate(5deg) scale(1.05);
+}
+
+/* Glassmorphism Doc Badge/Pill look */
+.doc-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(139, 92, 246, 0.07) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    border-radius: 12px !important;
+    padding: 8px 14px !important;
+    margin: 6px 0px !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: #c084fc !important;
+    width: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+}
+
+.doc-pill:hover {
+    background: rgba(139, 92, 246, 0.12) !important;
+    border-color: rgba(139, 92, 246, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+/* Custom interactive buttons styling */
+button, div.stButton > button {
+    border-radius: 10px !important;
+    background-color: #1e1b4b !important;
+    color: #e9d5ff !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover, div.stButton > button:hover {
+    background-color: #8b5cf6 !important;
+    color: #ffffff !important;
+    border-color: #a78bfa !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Main content dividers */
+hr {
+    border-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Streamlit Expander custom glass container styling */
+.streamlit-expanderHeader {
+    background-color: rgba(17, 24, 39, 0.5) !important;
+    border: 1px solid rgba(139, 92, 246, 0.1) !important;
+    border-radius: 8px !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.25);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.45);
+}
+
+/* Hero Container */
+.hero-container {
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 16px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.hero-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.hero-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    border: 1.5px solid #8b5cf6;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+    margin: 0;
+    transition: transform 0.3s ease;
+}
+
+.hero-logo:hover {
+    transform: scale(1.05) rotate(3deg);
+}
+
+.hero-title-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-slogan {
+    color: #a78bfa;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 2px 0 0 0;
+    letter-spacing: 0.3px;
+}
+
+/* Features Grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 5px;
+    text-align: left;
+}
+
+.feature-card {
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.12);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.15);
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    background: rgba(139, 92, 246, 0.08);
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+}
+
+.feature-text strong {
+    color: #f3f4f6;
+    font-size: 1.15rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.feature-text p {
+    color: #e2e8f0;
+    font-size: 0.92rem;
+    margin: 0;
+    line-height: 1.45;
+}

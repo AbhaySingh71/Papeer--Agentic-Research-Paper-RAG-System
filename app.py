@@ -2,8 +2,13 @@ import json
 import os
 import tempfile
 import uuid
+import base64
 from datetime import datetime
 from pathlib import Path
+
+def get_image_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 
 import streamlit as st
 from langchain_core.messages import HumanMessage
@@ -16,70 +21,10 @@ from backend.vector_store import add_paper, list_papers, delete_paper
 
 st.set_page_config(page_title="Papeer", page_icon="📚", layout="centered")
 
-# Premium CSS UI/UX overrides
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap');
-
-/* Font overrides */
-html, body, [data-testid="stSidebar"] {
-    font-family: 'Inter', sans-serif !important;
-}
-
-h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 600;
-}
-
-/* Glowing aesthetic sidebar background & layout styling */
-[data-testid="stSidebar"] {
-    background-color: #0c0f17 !important;
-    border-right: 1px solid rgba(124, 58, 237, 0.1) !important;
-}
-
-/* Custom premium badge look for loaded documents */
-.doc-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(124, 58, 237, 0.08);
-    border: 1px solid rgba(124, 58, 237, 0.2);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px 0px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #a78bfa;
-    width: 100%;
-}
-
-/* Smooth transitions for interactive elements */
-button, div.stButton > button {
-    border-radius: 8px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-div.stButton > button:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15) !important;
-}
-
-/* Custom layout scrollbars */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(124, 58, 237, 0.2);
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(124, 58, 237, 0.4);
-}
-</style>
-""", unsafe_allow_html=True)
+# Premium CSS UI/UX overrides from external stylesheet
+if os.path.exists("static/style.css"):
+    with open("static/style.css", "r", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 @st.cache_resource
@@ -262,6 +207,31 @@ active_sid = st.session_state.active_session_id
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
+    # Logo container
+    if os.path.exists("papeer_logo.jpg"):
+        img_b64 = get_image_base64("papeer_logo.jpg")
+        st.markdown(
+            f'''
+            <div class="logo-container">
+                <img class="logo-image" src="data:image/jpeg;base64,{img_b64}" alt="Papeer Logo">
+                <div style="font-family:\'Outfit\'; font-weight:800; font-size:1.4rem; margin-top:10px; color:#f3f4f6;">Papeer</div>
+                <div style="font-size:0.7rem; color:#a78bfa; font-weight: 600; letter-spacing:1.5px; margin-top:2px;">AI RESEARCH CO-PILOT</div>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            '''
+            <div class="logo-container">
+                <div style="width:90px;height:90px;border-radius:50%;background:#8b5cf6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:1.5rem;box-shadow:0 0 20px rgba(139,92,246,0.4)">📚</div>
+                <div style="font-family:\'Outfit\'; font-weight:800; font-size:1.4rem; margin-top:10px; color:#f3f4f6;">Papeer</div>
+                <div style="font-size:0.7rem; color:#a78bfa; font-weight: 600; letter-spacing:1.5px; margin-top:2px;">AI RESEARCH CO-PILOT</div>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
     if st.button("+ New Chat", use_container_width=True):
         new_sid = create_session()
         st.session_state.active_session_id = new_sid
@@ -423,27 +393,113 @@ with st.sidebar:
     else:
         st.caption("No documents loaded yet.")
 
+    # ── Quick Help Guide ─────────────────────────────────────────────────────────
+    st.divider()
+    with st.expander("ℹ️ Features & Commands Guide", expanded=False):
+        st.markdown(
+            """
+            <div style="font-size:0.85rem; line-height:1.5; color:#cbd5e1;">
+            <b>💬 Paper Q&A:</b> Ask questions normally to search your uploaded PDF/Text/ArXiv papers. Uses Hybrid Retrieval (Dense Vector + BM25).<br><br>
+            <b>🔍 Cohere Reranking:</b> Automatically re-scores retrieved snippets using <code>rerank-english-v3.0</code> to filter irrelevant details.<br><br>
+            <b>⚡ /btw Command:</b> Start a prompt with <code>/btw</code> (e.g., <i>/btw what is softplus?</i>) to chat directly with the AI, bypassing documents.<br><br>
+            <b>🛡️ Double Guardrails:</b> Automatically validates input queries (anti-injection check) and output answers (hallucination check).
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
 # ── Page header ────────────────────────────────────────────────────────────────
-st.title("📚 Papeer — Research Paper Assistant")
+if os.path.exists("papeer_logo.jpg"):
+    img_b64 = get_image_base64("papeer_logo.jpg")
+    logo_html = f'<img class="hero-logo" src="data:image/jpeg;base64,{img_b64}" alt="Papeer Logo">'
+else:
+    logo_html = '<div style="width:64px;height:64px;border-radius:14px;background:#8b5cf6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:1.5rem;box-shadow:0 0 15px rgba(139,92,246,0.4);">📚</div>'
+
 st.markdown(
-    "🔍 **Ask questions** from your uploaded papers &nbsp;·&nbsp; "
-    "✅ **Verify claims** against recent literature &nbsp;·&nbsp; "
-    "🌐 **Search the web** for the latest findings\n\n"
-    "> Upload documents in the sidebar and start chatting below."
+    f'''
+    <div class="hero-container" style="margin-bottom: 15px;">
+        <div class="hero-header-row" style="margin-bottom: 0;">
+            {logo_html}
+            <div class="hero-title-group">
+                <h1 class="main-title" style="margin:0; font-size: 2.1rem; line-height: 1;">Papeer</h1>
+                <p class="hero-slogan">Your Intelligent AI Research Co-pilot</p>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">⚡ Cohere Rerank v3</span>
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">📦 Qdrant Hybrid</span>
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">📊 LangSmith Traced</span>
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">🧪 DeepEval Measured</span>
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">🌐 Tavily Search</span>
+                    <span style="font-size:0.72rem; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); color:#c084fc; padding:2px 8px; border-radius:4px; font-weight:600; font-family:\'Inter\';">🛡️ Dual Guardrails</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    ''',
+    unsafe_allow_html=True
 )
-st.divider()
+
+st.markdown(
+    '''
+    <div class="features-container" style="background: rgba(30, 27, 75, 0.2); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+        <div class="features-grid" style="margin-top: 0;">
+            <div class="feature-card">
+                <span class="feature-icon">🔍</span>
+                <div class="feature-text">
+                    <strong>Ask Papers</strong>
+                    <p>Performs semantic retrieval across Qdrant vector databases and BM25 local keyword indices using an EnsembleRetriever (0.7 dense / 0.3 sparse). Documents are dynamically re-ranked via Cohere, validated by Guardrails, and traced in LangSmith.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">✅</span>
+                <div class="feature-text">
+                    <strong>Verify Claims</strong>
+                    <p>Extracts claims, expands them into target queries, and executes concurrent web queries on general engines and site-specific databases (arxiv.org) using Tavily to check for supporting/contradicting preprints, reviews, or literature.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🌐</span>
+                <div class="feature-text">
+                    <strong>Web Search</strong>
+                    <p>Integrates the Tavily search engine directly into the chat flow. Prefix any prompt with <code>/btw</code> to initiate a fast web query or chat session that bypasses the uploaded document stores and context memory limits.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
 
 # ── Chat display ───────────────────────────────────────────────────────────────
-for msg in st.session_state.chats.get(active_sid, []):
+chat_history = st.session_state.chats.get(active_sid, [])
+for msg in chat_history:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg["role"] == "assistant":
             with st.expander(f"📊 Graph state · turn {msg['turn']}", expanded=False):
                 st.json(msg["graph_state"])
 
+# Premium Quick Actions welcoming screen
+action_prompt = None
+if not chat_history:
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
+    st.markdown("### ⚡ Quick Start Prompts")
+    cols_actions = st.columns(3)
+    with cols_actions[0]:
+        if st.button("🛡️ Verify Claim\n\nLSTMs vs Transformers", use_container_width=True, key="qa_btn_1"):
+            action_prompt = "Verify claim: LSTMs outperform Transformers for long-context recall."
+    with cols_actions[1]:
+        if st.button("🌐 Search the Web\n\nLatest AI releases", use_container_width=True, key="qa_btn_2"):
+            action_prompt = "/btw What are the latest releases in generative AI?"
+    with cols_actions[2]:
+        if st.button("📊 Ask Papers\n\nCore methodology", use_container_width=True, key="qa_btn_3"):
+            action_prompt = "Summarize the core methodology and findings of the loaded documents."
+
 # ── Chat input ─────────────────────────────────────────────────────────────────
-if prompt := st.chat_input("Ask about your papers, verify a claim, or search the web…"):
+prompt_input = st.chat_input("Ask about your papers, verify a claim, or search the web…")
+prompt = prompt_input or action_prompt
+
+if prompt:
     is_btw = prompt.strip().lower().startswith("/btw")
 
     if is_btw:
