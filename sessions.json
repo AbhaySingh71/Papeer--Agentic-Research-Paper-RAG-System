@@ -28,5 +28,11 @@
     "name": "Moltbot Architecture Vulnerabilities",
     "created_at": "2026-06-24T18:05:22.541336",
     "is_named": true
+  },
+  "2e08678a-1981-4982-925b-9852f975fcfc": {
+    "id": "2e08678a-1981-4982-925b-9852f975fcfc",
+    "name": "Moltbot vs Claude Comparison",
+    "created_at": "2026-06-24T19:04:53.226211",
+    "is_named": true
   }
 }

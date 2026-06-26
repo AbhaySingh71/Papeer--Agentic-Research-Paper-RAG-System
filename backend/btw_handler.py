@@ -24,7 +24,8 @@ def handle_btw(query: str) -> Generator[str, None, None]:
     route_prompt = ChatPromptTemplate.from_messages([
         ("system",
          "Decide if answering this question requires a real-time web search (recent events, "
-         "current prices, breaking news) or if your general knowledge is sufficient."),
+         "current prices, breaking news) or if your general knowledge is sufficient. "
+         "Ensure the needs_web_search field is returned as a strict JSON boolean: true or false (do not output a string)."),
         ("human", "{query}"),
     ])
     decision = (route_prompt | llm.with_structured_output(BtwRouteDecision, method="function_calling")).invoke({"query": query})

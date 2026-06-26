@@ -53,6 +53,15 @@ def get_vectorstore(session_id: str) -> QdrantVectorStore:
             collection_name=collection_name,
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
+        from qdrant_client.models import PayloadSchemaType
+        try:
+            qdrant_client.create_payload_index(
+                collection_name=collection_name,
+                field_name="metadata.title",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            pass
     return QdrantVectorStore(
         client=qdrant_client,
         collection_name=collection_name,
@@ -91,10 +100,19 @@ def list_papers(session_id: str) -> list[str]:
 
 
 def delete_paper(title: str, session_id: str) -> None:
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
+    from qdrant_client.models import Filter, FieldCondition, MatchValue, PayloadSchemaType
     collection_name = get_collection_name(session_id)
     if not qdrant_client.collection_exists(collection_name):
         return
+    # Ensure payload index exists on metadata.title for existing collections
+    try:
+        qdrant_client.create_payload_index(
+            collection_name=collection_name,
+            field_name="metadata.title",
+            field_schema=PayloadSchemaType.KEYWORD,
+        )
+    except Exception:
+        pass
     qdrant_client.delete(
         collection_name=collection_name,
         points_selector=Filter(
