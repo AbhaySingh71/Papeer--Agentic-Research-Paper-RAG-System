@@ -1,0 +1,31 @@
+.venv/
+__pycache__/
+.git/
+.agents/
+.antigravitycli/
+.deepeval/
+documents/
+embedding_cache/
+sessions.json
+*.db-shm
+*.db-wal
+docker-compose.yml
+terraform/
+.terraform/
+terraform.tfstate*
+*.md
+.env
+.env*
+
+# Evaluation and test files
+evaluate.py
+eval_results.json
+goldens.json
+eval_checkpoints.db
+test_checkpoints.db
+
+# Exclude local database/checkpoints to prevent embedding static DB files into the build image
+*.db
+checkpoints.db
+
+graph.png
