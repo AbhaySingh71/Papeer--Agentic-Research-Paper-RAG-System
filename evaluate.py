@@ -18,37 +18,10 @@ from deepeval.metrics import (
     ContextualRelevancyMetric,
     FaithfulnessMetric,
 )
-from groq import Groq, AsyncGroq
-from deepeval.models.base_model import DeepEvalBaseLLM
+from deepeval.models import OpenAIModel
 from deepeval.synthesizer import Synthesizer
 from deepeval.synthesizer.config import ContextConstructionConfig
 from deepeval.test_case import LLMTestCase
-
-class GroqLLM(DeepEvalBaseLLM):
-    def __init__(self, model_name: str = "llama-3.3-70b-versatile"):
-        self.model_name = model_name
-        self.client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-        self.async_client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY"))
-
-    def load_model(self):
-        return self.model_name
-
-    def get_model_name(self) -> str:
-        return self.model_name
-
-    def generate(self, prompt: str) -> str:
-        chat_completion = self.client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model=self.model_name,
-        )
-        return chat_completion.choices[0].message.content
-
-    async def a_generate(self, prompt: str) -> str:
-        chat_completion = await self.async_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model=self.model_name,
-        )
-        return chat_completion.choices[0].message.content
 
 from backend.paper_loader import load_document
 from backend.rag_graph import build_graph
@@ -109,7 +82,7 @@ def run_rag_query(graph, query: str, session_id: str) -> tuple[str, list[str]]:
 
 
 def main() -> None:
-    eval_model = GroqLLM(model_name="llama-3.3-70b-versatile")
+    eval_model = OpenAIModel(model="gpt-4o-mini")
     pairs = load_goldens() if GOLDENS_FILE.exists() else generate_goldens(eval_model)
 
     docs = load_document(PDF_PATH)
