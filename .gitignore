@@ -240,3 +240,9 @@ embedding_cache/
 .deepeval/
 
 .env
+
+# Terraform ignore patterns
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
