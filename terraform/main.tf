@@ -97,7 +97,6 @@ resource "aws_efs_mount_target" "mount" {
 resource "aws_ecr_repository" "repo" {
   name                 = var.project_name
   image_tag_mutability = "MUTABLE"
-  force_destroy        = true
 
   image_scanning_configuration {
     scan_on_push = true
