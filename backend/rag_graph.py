@@ -425,7 +425,10 @@ def after_relevancy_routing(state: RAGState) -> str:
     return "generate_answer"
 
 
-def build_graph(db_path: str = "checkpoints.db"):
+def build_graph(db_path: str = None):
+    if db_path is None:
+        data_dir = os.environ.get("PAPEER_DATA_DIR", ".")
+        db_path = os.path.join(data_dir, "checkpoints.db")
     conn = sqlite3.connect(db_path, check_same_thread=False)
     checkpointer = SqliteSaver(conn)
 

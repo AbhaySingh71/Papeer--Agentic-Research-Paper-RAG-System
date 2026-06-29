@@ -27,12 +27,19 @@ if os.path.exists("static/style.css"):
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
+# Data directory for persistent storage (EFS in production)
+DATA_DIR = Path(os.environ.get("PAPEER_DATA_DIR", "."))
+if not DATA_DIR.exists():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 @st.cache_resource
 def get_graph():
-    return build_graph()
+    # Pass the custom database path inside the persistent directory
+    db_path = str(DATA_DIR / "checkpoints.db")
+    return build_graph(db_path=db_path)
 
 
-SESSIONS_FILE = Path("sessions.json")
+SESSIONS_FILE = DATA_DIR / "sessions.json"
 _rename_llm = ChatOpenAI(
     model="llama-3.1-8b-instant",
     openai_api_key=os.environ["GROQ_API_KEY"],
@@ -137,7 +144,7 @@ def delete_session(session_id: str) -> None:
 
     import sqlite3
     try:
-        conn = sqlite3.connect("checkpoints.db")
+        conn = sqlite3.connect(DATA_DIR / "checkpoints.db")
         cursor = conn.cursor()
         for table in ["checkpoints", "checkpoint_writes", "checkpoint_blobs"]:
             try:

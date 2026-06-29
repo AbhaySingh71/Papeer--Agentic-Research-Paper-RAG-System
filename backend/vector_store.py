@@ -24,7 +24,8 @@ EMBEDDING_DIM = 3072  # models/gemini-embedding-001
 # ── Singletons ────────────────────────────────────────────────────────────────
 
 base_embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-embedding_file_store = LocalFileStore("./embedding_cache/")
+data_dir = os.environ.get("PAPEER_DATA_DIR", ".")
+embedding_file_store = LocalFileStore(os.path.join(data_dir, "embedding_cache"))
 embeddings = CacheBackedEmbeddings.from_bytes_store(
     base_embeddings,
     embedding_file_store,

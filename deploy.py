@@ -74,7 +74,7 @@ def main():
         sys.exit(1)
 
     # 5. Run Terraform Init
-    print("🚀 Initializing Terraform...")
+    print("Initializing Terraform...")
     try:
         subprocess.run(
             ["terraform", "init"],
@@ -87,7 +87,7 @@ def main():
         sys.exit(1)
 
     # 6. Run Terraform Apply with -auto-approve
-    print("🚀 Deploying AWS Infrastructure...")
+    print("Deploying AWS Infrastructure...")
     try:
         subprocess.run(
             ["terraform", "apply", "-auto-approve"],

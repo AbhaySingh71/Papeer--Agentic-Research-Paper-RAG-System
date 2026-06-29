@@ -210,13 +210,14 @@ resource "aws_ecs_task_definition" "task" {
         { name = "LANGCHAIN_TRACING_V2", value = var.langchain_tracing_v2 },
         { name = "LANGCHAIN_API_KEY", value = var.langchain_api_key },
         { name = "LANGCHAIN_PROJECT", value = var.langchain_project },
-        { name = "LANGSMITH_ENDPOINT", value = var.langchain_endpoint }
+        { name = "LANGSMITH_ENDPOINT", value = var.langchain_endpoint },
+        { name = "PAPEER_DATA_DIR", value = "/app/data" }
       ]
 
       mountPoints = [
         {
           sourceVolume  = "efs-storage"
-          containerPath = "/app"
+          containerPath = "/app/data"
           readOnly      = false
         }
       ]
