@@ -28,11 +28,11 @@ Use this section for the four primary product screenshots you want on GitHub.
 
 | Demo 1 | Demo 2 |
 | --- | --- |
-| ![Main demo 1](assets/demo-1.png) | ![Main demo 2](assets/demo-2.png) |
+| ![Main demo 1](assets/papeer19.png) | ![Main demo 2](assets/papeer28.png) |
 
 | Demo 3 | Demo 4 |
 | --- | --- |
-| ![Main demo 3](assets/demo-3.png) | ![Main demo 4](assets/demo-4.png) |
+| ![Main demo 3](assets/papeer18.png) | ![Main demo 4](assets/papeer29.png) |
 
 ## What Papeer does
 
@@ -77,12 +77,6 @@ Retrieval is intentionally hybrid:
 
 This is useful for research questions where exact terminology, formulas, or paper names matter just as much as semantic similarity.
 
-#### Screenshot template
-
-| Dashboard Overview | Vector Collection Detail |
-| --- | --- |
-| ![Qdrant Dashboard](assets/qdrant-dashboard.png) | ![Qdrant Collections](assets/qdrant-collections.png) |
-
 ### 4. Self-correcting retrieval loop
 
 The LangGraph agent does not stop after one failed retrieval. If the retrieved chunks are not relevant enough, the graph can rewrite the query once and try again. A cap prevents unbounded tool calls, and the graph avoids corrupting the persisted conversation history by always resolving pending tool calls before moving forward.
@@ -116,7 +110,7 @@ If validation fails, the system returns a safe fallback message instead of expos
 
 | Input safety check | Output moderation check |
 | --- | --- |
-| ![Guardrails input screenshot](assets/guardrails-input.png) | ![Guardrails output screenshot](assets/guardrails-output.png) |
+| ![Guardrails input screenshot](assets/papeer1.png) | ![Guardrails output screenshot](assets/papeer61.png) |
 
 ### 7. Off-topic `/btw` channel
 
@@ -152,7 +146,7 @@ The target threshold is `0.7`, and the evaluation runner uses a bounded async co
 
 | Goldens generation | Evaluation summary |
 | --- | --- |
-| ![Evaluation goldens screenshot](assets/evaluation-goldens.png) | ![Evaluation results screenshot](assets/evaluation-results.png) |
+| ![Evaluation goldens screenshot](assets/papeer63.png) | ![Evaluation results screenshot](assets/papeer62.png) |
 
 ### 10. LangSmith tracing and observability
 
@@ -173,18 +167,7 @@ The deployment and environment setup also wire in the LangSmith variables, so tr
 
 | Session trace | Tool execution trace |
 | --- | --- |
-| ![LangSmith session screenshot](assets/langsmith-session.png) | ![LangSmith tool screenshot](assets/langsmith-tools.png) |
-
-### 11. AWS Deployment & Infrastructure
-
-Papeer is containerized and ready for cloud deployment. The project includes Terraform files to spin up a serverless AWS Fargate service, EFS persistent storage, ECR container registry, and IAM roles to execute tasks securely.
-
-#### Screenshot template
-
-| ECS Fargate Service | Infrastructure Overview |
-| --- | --- |
-| ![AWS ECS Fargate](assets/aws-ecs.png) | ![AWS EFS & Infrastructure](assets/aws-efs.png) |
-
+| ![LangSmith session screenshot](assets/papeer34.png) | ![LangSmith tool screenshot](assets/papeer37.png) |
 
 ## Architecture
 
@@ -343,6 +326,13 @@ Deployment is split into two paths:
 
 ### How deployment works
 
+
+#### AWS Deployment & Cloud Infrastructure
+
+| ECS Fargate Service | AWS EFS Persistent Storage |
+| --- | --- |
+| ![AWS ECS Fargate](assets/papeer15.png) | ![AWS EFS Mount & Storage](assets/papeer23.png) |
+
 `deploy.py` is the entrypoint for infrastructure deployment. It:
 
 1. Reads secrets from `.env`.
@@ -353,6 +343,14 @@ Deployment is split into two paths:
 6. Runs `terraform apply -auto-approve`.
 
 ### What the Terraform stack creates
+
+#### Terraform Lifecycle
+
+| Terraform Apply (Deploy) | Terraform Destroy (Teardown) |
+| --- | --- |
+| ![Terraform Deploy](assets/terraform-deploy.png) | ![Terraform Destroy](assets/terraform-destroy.png) |
+
+
 
 The Terraform configuration provisions a lightweight AWS runtime around the app:
 
@@ -390,6 +388,11 @@ The workflow does the following:
 This gives the project a simple CI/CD loop: code push, image build, registry push, ECS rollout.
 
 ## Notes on data storage
+
+| Dashboard Overview | Vector Collection Detail |
+| --- | --- |
+| ![Qdrant Dashboard](assets/qdrant-dashboard.png) | ![Qdrant Collections](assets/qdrant-collections.png) |
+
 
 1. Session metadata is stored in `sessions.json`.
 2. Checkpoints are stored in SQLite databases such as `checkpoints.db` and `eval_checkpoints.db`.
