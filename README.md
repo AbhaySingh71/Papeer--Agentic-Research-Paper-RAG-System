@@ -77,6 +77,12 @@ Retrieval is intentionally hybrid:
 
 This is useful for research questions where exact terminology, formulas, or paper names matter just as much as semantic similarity.
 
+#### Screenshot template
+
+| Dashboard Overview | Vector Collection Detail |
+| --- | --- |
+| ![Qdrant Dashboard](assets/qdrant-dashboard.png) | ![Qdrant Collections](assets/qdrant-collections.png) |
+
 ### 4. Self-correcting retrieval loop
 
 The LangGraph agent does not stop after one failed retrieval. If the retrieved chunks are not relevant enough, the graph can rewrite the query once and try again. A cap prevents unbounded tool calls, and the graph avoids corrupting the persisted conversation history by always resolving pending tool calls before moving forward.
@@ -168,6 +174,17 @@ The deployment and environment setup also wire in the LangSmith variables, so tr
 | Session trace | Tool execution trace |
 | --- | --- |
 | ![LangSmith session screenshot](assets/langsmith-session.png) | ![LangSmith tool screenshot](assets/langsmith-tools.png) |
+
+### 11. AWS Deployment & Infrastructure
+
+Papeer is containerized and ready for cloud deployment. The project includes Terraform files to spin up a serverless AWS Fargate service, EFS persistent storage, ECR container registry, and IAM roles to execute tasks securely.
+
+#### Screenshot template
+
+| ECS Fargate Service | Infrastructure Overview |
+| --- | --- |
+| ![AWS ECS Fargate](assets/aws-ecs.png) | ![AWS EFS & Infrastructure](assets/aws-efs.png) |
+
 
 ## Architecture
 

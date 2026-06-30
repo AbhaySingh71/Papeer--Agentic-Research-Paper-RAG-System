@@ -32,6 +32,13 @@ graph TD
 
 ### Key Infrastructure Components & Choices
 
+#### AWS Deployment & Cloud Infrastructure
+
+| ECS Fargate Service | AWS EFS Persistent Storage |
+| --- | --- |
+| ![AWS ECS Fargate](assets/papeer15.png) | ![AWS EFS Mount & Storage](assets/papeer23.png) |
+
+
 *   **AWS Fargate (Serverless Containers)**: 
     *   *What it is*: A serverless compute engine for containers that works with Amazon Elastic Container Service (ECS).
     *   *Why we use it*: Fargate removes the need to provision, configure, or scale virtual machines (EC2 instances). AWS manages the underlying server management, patching, and provisioning. It is highly cost-effective for applications with variable traffic patterns.
@@ -49,7 +56,15 @@ graph TD
 
 ## 2. Infrastructure as Code (IaC) with Terraform
 
-All AWS infrastructure for Papeer is defined declaratively using **Terraform** under the [terraform/](file:///C:/Users/abhay/Desktop/papeer/terraform) directory.
+All AWS infrastructure for Papeer is defined declaratively using **Terraform** under the [terraform/]directory.
+
+
+#### Terraform Lifecycle
+
+| Terraform Apply (Deploy) | Terraform Destroy (Teardown) |
+| --- | --- |
+| ![Terraform Deploy](assets/terraform-deploy.png) | ![Terraform Destroy](assets/terraform-destroy.png) |
+
 
 ### Why Terraform?
 1.  **Consistency**: Prevents configuration drift and "human-in-the-loop" errors associated with manual AWS Console configuration.
