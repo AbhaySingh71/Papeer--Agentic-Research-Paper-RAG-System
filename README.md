@@ -1,5 +1,11 @@
 # Papeer RAG AI
 
+<p align="center">
+  <a href="https://hub.docker.com/repository/docker/abhaysingh71/papeer">
+    <img src="https://img.shields.io/docker/pulls/abhaysingh71/papeer" alt="Docker Pulls">
+  </a>
+</p>
+
 [![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-111827)](https://langchain-ai.github.io/langgraph/)
@@ -149,7 +155,7 @@ By integrating Cohere Reranking into the RAG pipeline, we resolved retrieval noi
 | **Contextual Precision** | 1.00 (100%) | 1.00 (100%) |
 | **Contextual Recall** | 1.00 (100%) | 1.00 (100%) |
 | **Contextual Relevancy** | 0.50 (50%) | 0.90 (90%) |
-| **Answer Relevancy** | 1.00 (100%) | 1.00 (100%) |
+| **Answer Relevancy** | 0.60 (60%) | 0.90 (90%) |
 | **Faithfulness** | 1.00 (100%) | 1.00 (100%) |
 
 > [!TIP]
@@ -333,11 +339,10 @@ This script loads the benchmark paper, generates or reuses goldens, evaluates th
 
 ## Deployment
 
-Deployment supports multiple options:
+Deployment is split into two paths:
 
-1. **Streamlit Community Cloud**: The easiest path to deploy directly from GitHub. Check the [Streamlit Deployment Guide](streamlit_deployment.md) for step-by-step instructions and secrets setup.
-2. **Dockerfile**: For packaging the application into a portable, production-ready container.
-3. **AWS Fargate & Terraform**: For serverless, containerized hosting on AWS with persistent EFS storage. Defined in `deploy.py` and the `terraform/` directory.
+1. `Dockerfile` for building the application container.
+2. `deploy.py` plus the `terraform/` folder for provisioning AWS infrastructure.
 
 ### How deployment works
 
@@ -429,9 +434,3 @@ This gives the project a simple CI/CD loop: code push, image build, registry pus
 ## Why this repo is structured this way
 
 The codebase is split so the UI stays thin and the reasoning logic stays testable. `app.py` handles user experience and session state, while `backend/rag_graph.py` owns the orchestration, `backend/vector_store.py` owns retrieval, `backend/paper_loader.py` owns ingestion, and `backend/guardrails.py` owns safety checks. That separation makes the system easier to extend without turning the UI into the source of truth.
-
----
-
-## License
-
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for the full license text.
