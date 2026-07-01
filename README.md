@@ -1,4 +1,4 @@
-# Papeer RAG AI
+# Papeer - Agentic Research Paper RAG System
 
 <p align="center">
   <a href="https://hub.docker.com/repository/docker/abhaysingh71/papeer">
