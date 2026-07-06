@@ -38,6 +38,10 @@ The app is driven by LangGraph and LangChain, uses Qdrant for per-session vector
 | --- | --- |
 | ![Main demo 3](assets/papeer18.png) | ![Main demo 4](assets/papeer29.png) |
 
+### System Architecture
+
+![Papeer System Architecture](assets/papeer%20architecture.png)
+
 ## What Papeer does
 
 Papeer is built around a few distinct workflows:
